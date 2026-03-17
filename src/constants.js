@@ -55,6 +55,36 @@ Generate an "Ignored Signal" — something real and quiet happening in the world
 Respond ONLY with a JSON object — no markdown, no backticks, no preamble.
 
 {"signal":"One sentence headline","why_ignored":"1-2 sentences on why it flies under the radar","the_evidence":"2-3 sentences of concrete, specific detail","why_it_matters":"2-3 sentences of open implications — not alarmist","carry_question":"One open question","session_title":"A poetic 3-5 word title"}`
+  },
+  {
+    id: "dead_genius",
+    label: "Dead Genius",
+    icon: "🏛",
+    tagline: "Think through a legendary mind.",
+    buildPrompt: (seed) => `You are the content engine for "Wander" — a mindfulness and creativity app.
+
+Generate a "Dead Genius" session. Pick a real historical thinker (philosopher, scientist, artist, strategist, inventor — anyone brilliant and dead). Apply their unique way of thinking to a real, modern problem.${seed ? ` The user is wrestling with: "${seed}". Choose a thinker whose framework offers a genuinely useful lens on this.` : " Choose a surprising thinker and a modern problem that feels urgent but mundane."}
+
+The genius should NOT just give advice — show how their *mental model* reframes the problem entirely. Be specific about their actual ideas, not generic wisdom.
+
+Respond ONLY with a JSON object — no markdown, no backticks, no preamble.
+
+{"genius":{"name":"Full name","era":"e.g. Ancient Rome, 1800s Germany","known_for":"One sentence — their big idea or contribution"},"the_problem":"A modern, relatable problem stated in 1-2 sentences","their_lens":"2-3 sentences: how this thinker would specifically reframe or approach the problem, referencing their actual philosophy or method","the_move":"2-3 sentences: a concrete action or shift in thinking that follows from their framework","the_tension":"1 sentence: what this approach gets wrong or ignores — steelman the counterargument","carry_question":"One open question","session_title":"A poetic 3-5 word title"}`
+  },
+  {
+    id: "detour",
+    label: "The Detour",
+    icon: "🔀",
+    tagline: "Three hops to somewhere new.",
+    buildPrompt: (seed) => `You are the content engine for "Wander" — a mindfulness and creativity app.
+
+Generate a "Detour" session — a random walk of ideas. Start with one concept${seed ? ` related to "${seed}"` : " (anything interesting)"}, then make exactly 3 unexpected hops. Each hop should feel like a surprising but real connection — not random, but non-obvious. The reader should end up somewhere completely different from where they started.
+
+Each hop should be 2-3 sentences explaining the connection and the new territory. The final destination should feel like a revelation.
+
+Respond ONLY with a JSON object — no markdown, no backticks, no preamble.
+
+{"origin":{"idea":"Starting concept in a few words","domain":"The field it belongs to","setup":"1-2 sentences introducing this idea"},"hops":[{"idea":"Second concept","domain":"Different field","connection":"2-3 sentences: how we got here from the previous idea — the surprising link"},{"idea":"Third concept","domain":"Yet another field","connection":"2-3 sentences: the next unexpected leap"},{"idea":"Final destination","domain":"A field far from the origin","connection":"2-3 sentences: the last hop — make it land with weight"}],"the_view_from_here":"2 sentences: standing at the destination, what do you now see about where you started?","carry_question":"One open question","session_title":"A poetic 3-5 word title"}`
   }
 ];
 

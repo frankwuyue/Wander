@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { SESSION_TYPES, COLORS } from "./constants.js";
 import { loadJournal, saveJournal, loadDailyState, saveDailyState, todayKey, saveLastSession, loadLastSession, loadOnboarded, saveOnboarded } from "./storage.js";
-import { generateSession } from "./api.js";
+import { generateSession, generateAnnualReview } from "./api.js";
 import { shareCarryQuestion } from "./shareImage.js";
 import SessionContent from "./components/SessionContent.jsx";
 import Journal from "./components/Journal.jsx";
@@ -73,6 +73,9 @@ export default function App() {
   const [lastSession, setLastSession] = useState(null);
   const [onboarded, setOnboarded] = useState(true); // default true to avoid flash
   const [sharing, setSharing] = useState(false);
+  const [pendingMood, setPendingMood] = useState(null);
+  const [annualReview, setAnnualReview] = useState(null);
+  const [loadingReview, setLoadingReview] = useState(false);
   const timerRef = useRef(null);
 
   useEffect(() => {
@@ -113,6 +116,20 @@ export default function App() {
     setSharing(false);
   };
 
+  const handleAnnualReview = async () => {
+    setScreen("annual-review");
+    setLoadingReview(true);
+    setAnnualReview(null);
+    try {
+      const review = await generateAnnualReview(journal);
+      setAnnualReview(review);
+    } catch {
+      setError("Couldn't generate your review. Try again later.");
+      setScreen("journal");
+    }
+    setLoadingReview(false);
+  };
+
   const handleTypeSelect = (type) => { setPendingType(type); setShowSeedInput(true); };
 
   const startSession = async (type, seedText) => {
@@ -139,7 +156,12 @@ export default function App() {
     setScreen("session");
   };
 
-  const handleFlush = async () => {
+  const handleFlush = () => {
+    setPendingMood(null);
+    setScreen("mood");
+  };
+
+  const handleMoodSelect = async (mood) => {
     const entry = {
       id: Date.now(),
       date: todayKey(),
@@ -148,6 +170,7 @@ export default function App() {
       carryQuestion: sessionData.carry_question,
       seed: seed?.trim() || null,
       duration: fmtDuration(elapsed),
+      mood: mood || null,
     };
     const updated = [...journal, entry];
     setJournal(updated);
@@ -213,7 +236,51 @@ export default function App() {
       <div style={shell}><div style={phone}>
         <Grain />
         <div style={{ position: "relative", zIndex: 1, flex: 1, display: "flex", flexDirection: "column" }}>
-          <Journal journal={journal} onBack={() => setScreen("home")} />
+          <Journal journal={journal} onBack={() => setScreen("home")} onAnnualReview={handleAnnualReview} />
+        </div>
+      </div></div>
+    </>
+  );
+
+  // ── Annual Review
+  if (screen === "annual-review") return (
+    <>
+      <style>{CSS}</style>
+      <div style={shell}><div style={phone}>
+        <Grain />
+        <div style={{ position: "relative", zIndex: 1, flex: 1, display: "flex", flexDirection: "column", padding: "52px 24px 32px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 32 }}>
+            <button onClick={() => setScreen("journal")} style={{ background: "none", border: "none", color: COLORS.goldDim, fontSize: 20, cursor: "pointer", padding: 0, lineHeight: 1 }}>←</button>
+            <div>
+              <div style={{ fontSize: 18, fontFamily: "'Cormorant Garamond',serif", color: COLORS.text }}>Year in Questions</div>
+              <Tag color={COLORS.textFaint}>{journal.length} sessions reflected</Tag>
+            </div>
+          </div>
+
+          {loadingReview ? (
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
+              <div style={{ fontSize: 30, marginBottom: 20 }}>✦</div>
+              <div style={{ fontSize: 12, color: COLORS.textDim, letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 8 }}>Reading your questions</div>
+              <div style={{ fontSize: 11, color: COLORS.textFaint }}>Finding the threads…</div>
+              <Orbs />
+            </div>
+          ) : annualReview ? (
+            <div style={{ flex: 1, overflowY: "auto", animation: "fadeUp 0.5s ease forwards" }}>
+              <div style={{ fontSize: 24, fontFamily: "'Cormorant Garamond',serif", color: COLORS.text, lineHeight: 1.35, marginBottom: 24 }}>{annualReview.title}</div>
+              <div style={{ fontSize: 14, color: COLORS.textMid, lineHeight: 2, marginBottom: 28, whiteSpace: "pre-line" }}>{annualReview.reflection}</div>
+              <Divider margin="0 0 20px" />
+              <Tag>Themes</Tag>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8, margin: "12px 0 28px" }}>
+                {annualReview.themes?.map((theme, i) => (
+                  <span key={i} style={{ padding: "6px 14px", background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 20, fontSize: 12, color: COLORS.goldDim }}>{theme}</span>
+                ))}
+              </div>
+              <div style={{ borderLeft: `2px solid ${COLORS.gold}`, paddingLeft: 16, marginBottom: 32 }}>
+                <Tag>A question for the road</Tag>
+                <div style={{ fontSize: 16, fontFamily: "'Cormorant Garamond',serif", fontStyle: "italic", color: COLORS.gold, lineHeight: 1.65, marginTop: 8 }}>{annualReview.closing_question}</div>
+              </div>
+            </div>
+          ) : null}
         </div>
       </div></div>
     </>
@@ -361,6 +428,34 @@ export default function App() {
               <span>🚿</span> Flush & carry the question
             </button>
           </div>
+        </div>
+      </div></div>
+    </>
+  );
+
+  // ── Mood picker
+  if (screen === "mood") return (
+    <>
+      <style>{CSS}</style>
+      <div style={shell}><div style={phone}>
+        <Grain />
+        <div style={{ position: "relative", zIndex: 1, flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 32px", textAlign: "center" }}>
+          <div style={{ fontSize: 22, fontFamily: "'Cormorant Garamond',serif", color: COLORS.text, lineHeight: 1.4, marginBottom: 10, animation: "fadeUp 0.5s ease forwards" }}>
+            How did that<br /><span style={{ color: COLORS.gold }}>feel?</span>
+          </div>
+          <div style={{ fontSize: 12, color: COLORS.textDim, marginBottom: 36, animation: "fadeUp 0.5s ease 0.1s both" }}>One tap. No scores.</div>
+          <div style={{ display: "flex", gap: 16, flexWrap: "wrap", justifyContent: "center", marginBottom: 36, animation: "fadeUp 0.5s ease 0.2s both" }}>
+            {["🌊", "⚡", "🌿", "🔥", "🌙", "✨"].map(emoji => (
+              <button key={emoji} className="btn" onClick={() => { setPendingMood(emoji); handleMoodSelect(emoji); }}
+                style={{ width: 56, height: 56, borderRadius: "50%", border: `1px solid ${pendingMood === emoji ? "rgba(200,184,154,0.4)" : COLORS.border}`, background: pendingMood === emoji ? "rgba(200,184,154,0.1)" : COLORS.bgCard, fontSize: 24, display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s ease" }}>
+                {emoji}
+              </button>
+            ))}
+          </div>
+          <button className="btn" onClick={() => handleMoodSelect(null)}
+            style={{ padding: 12, border: `1px solid ${COLORS.textFaint}22`, borderRadius: 12, color: COLORS.textFaint, fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", animation: "fadeUp 0.5s ease 0.3s both" }}>
+            Skip
+          </button>
         </div>
       </div></div>
     </>
