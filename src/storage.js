@@ -89,3 +89,29 @@ export async function loadLastSession() {
     return null;
   }
 }
+
+// ─── Onboarding ───────────────────────────────────────────────────────────────
+
+const ONBOARDED_KEY = "wander-onboarded";
+
+export async function loadOnboarded() {
+  try {
+    if (useLocalStorage()) {
+      return localStorage.getItem(ONBOARDED_KEY) === "true";
+    }
+    const r = await window.storage.get(ONBOARDED_KEY);
+    return r?.value === "true";
+  } catch {
+    return false;
+  }
+}
+
+export async function saveOnboarded() {
+  try {
+    if (useLocalStorage()) {
+      localStorage.setItem(ONBOARDED_KEY, "true");
+      return;
+    }
+    await window.storage.set(ONBOARDED_KEY, "true");
+  } catch {}
+}
