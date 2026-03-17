@@ -1,8 +1,12 @@
 # 🌀 Wander
 ### *A sanctuary for the wandering mind*
 
-> **One session per day. One idea. No feed. No algorithm. No streaks.**  
+> **One session per day. One idea. No feed. No algorithm. No streaks.**
 > Just 10 minutes that leave you thinking differently.
+
+<p align="center">
+  <img src="docs/screenshots/home.png" alt="Wander home screen" width="300" />
+</p>
 
 ---
 
