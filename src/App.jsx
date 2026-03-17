@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { SESSION_TYPES, COLORS } from "./constants.js";
-import { loadJournal, saveJournal, loadDailyState, saveDailyState, todayKey } from "./storage.js";
+import { loadJournal, saveJournal, loadDailyState, saveDailyState, todayKey, saveLastSession, loadLastSession } from "./storage.js";
 import { generateSession } from "./api.js";
 import SessionContent from "./components/SessionContent.jsx";
 import Journal from "./components/Journal.jsx";
@@ -52,7 +52,7 @@ const fmtDuration = (s) => s < 60 ? `${s}s` : `${Math.floor(s / 60)}m ${s % 60}s
 
 // ─── App shell ────────────────────────────────────────────────────────────────
 const shell = { minHeight: "100vh", background: COLORS.bg, display: "flex", justifyContent: "center", fontFamily: "'DM Mono',monospace" };
-const phone = { width: "100%", maxWidth: 420, minHeight: "100vh", background: "linear-gradient(160deg,#141008 0%,#0f0d0a 50%,#0c0b08 100%)", position: "relative", overflow: "hidden", display: "flex", flexDirection: "column" };
+const phone = { width: "100%", maxWidth: 420, minHeight: "100vh", background: "linear-gradient(160deg,#141008 0%,#0f0d0a 50%,#0c0b08 100%)", position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", paddingTop: "env(safe-area-inset-top)", paddingBottom: "env(safe-area-inset-bottom)" };
 
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function App() {
@@ -67,15 +67,23 @@ export default function App() {
   const [journal, setJournal] = useState([]);
   const [dailyDone, setDailyDone] = useState(false);
   const [loadingStorage, setLoadingStorage] = useState(true);
+  const [offline, setOffline] = useState(!navigator.onLine);
+  const [lastSession, setLastSession] = useState(null);
   const timerRef = useRef(null);
 
   useEffect(() => {
     (async () => {
-      const [j, d] = await Promise.all([loadJournal(), loadDailyState()]);
+      const [j, d, ls] = await Promise.all([loadJournal(), loadDailyState(), loadLastSession()]);
       setJournal(j);
       if (d && d.date === todayKey()) setDailyDone(true);
+      if (ls) setLastSession(ls);
       setLoadingStorage(false);
     })();
+    const goOnline = () => setOffline(false);
+    const goOffline = () => setOffline(true);
+    window.addEventListener("online", goOnline);
+    window.addEventListener("offline", goOffline);
+    return () => { window.removeEventListener("online", goOnline); window.removeEventListener("offline", goOffline); };
   }, []);
 
   useEffect(() => {
@@ -98,10 +106,20 @@ export default function App() {
       const data = await generateSession(type.buildPrompt(seedText?.trim() || null));
       setSessionData(data);
       setScreen("session");
+      saveLastSession({ data, typeId: type.id });
+      setLastSession({ data, typeId: type.id });
     } catch {
       setError("Something went quiet. Take a breath and try again.");
       setScreen("home");
     }
+  };
+
+  const replayLastSession = () => {
+    if (!lastSession) return;
+    const type = SESSION_TYPES.find(t => t.id === lastSession.typeId) || SESSION_TYPES[0];
+    setSelectedType(type);
+    setSessionData(lastSession.data);
+    setScreen("session");
   };
 
   const handleFlush = async () => {
@@ -244,6 +262,26 @@ export default function App() {
           </div>
 
           {error && <div style={{ marginTop: 14, padding: "12px 14px", background: "rgba(200,100,80,0.08)", borderRadius: 10, fontSize: 12, color: "#b07060", border: "1px solid rgba(200,100,80,0.18)" }}>{error}</div>}
+
+          {offline && (
+            <div style={{ marginTop: 14, padding: "12px 14px", background: "rgba(200,184,154,0.06)", borderRadius: 10, fontSize: 11, color: COLORS.textDim, border: `1px solid ${COLORS.border}`, display: "flex", alignItems: "center", gap: 10 }}>
+              <span style={{ fontSize: 14 }}>◌</span>
+              <span>You're offline.{lastSession ? " You can re-read your last session." : ""}</span>
+            </div>
+          )}
+
+          {offline && lastSession && (
+            <button className="btn card-hover" onClick={replayLastSession}
+              style={{ marginTop: 10, width: "100%", padding: "14px 16px", border: `1px solid ${COLORS.border}`, borderRadius: 13, display: "flex", alignItems: "center", gap: 13 }}>
+              <span style={{ fontSize: 18 }}>↩</span>
+              <div style={{ flex: 1, textAlign: "left" }}>
+                <div style={{ fontSize: 13, color: COLORS.textDim }}>Re-read last session</div>
+                <div style={{ fontSize: 10, color: COLORS.textFaint }}>{lastSession.data?.session_title || "Your previous session"}</div>
+              </div>
+              <div style={{ color: COLORS.goldFaint, fontSize: 15 }}>›</div>
+            </button>
+          )}
+
           <div style={{ marginTop: "auto", paddingTop: 24, fontSize: 9, color: COLORS.textFaint, letterSpacing: "0.12em", textAlign: "center" }}>No streaks · No scores · Just thinking</div>
         </div>
       </div></div>
