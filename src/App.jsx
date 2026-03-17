@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { SESSION_TYPES, COLORS } from "./constants.js";
-import { loadJournal, saveJournal, loadDailyState, saveDailyState, todayKey, saveLastSession, loadLastSession } from "./storage.js";
+import { loadJournal, saveJournal, loadDailyState, saveDailyState, todayKey, saveLastSession, loadLastSession, loadOnboarded, saveOnboarded } from "./storage.js";
 import { generateSession } from "./api.js";
+import { shareCarryQuestion } from "./shareImage.js";
 import SessionContent from "./components/SessionContent.jsx";
 import Journal from "./components/Journal.jsx";
+import Onboarding from "./components/Onboarding.jsx";
 
 // ─── Global CSS ───────────────────────────────────────────────────────────────
 const CSS = `
@@ -69,14 +71,17 @@ export default function App() {
   const [loadingStorage, setLoadingStorage] = useState(true);
   const [offline, setOffline] = useState(!navigator.onLine);
   const [lastSession, setLastSession] = useState(null);
+  const [onboarded, setOnboarded] = useState(true); // default true to avoid flash
+  const [sharing, setSharing] = useState(false);
   const timerRef = useRef(null);
 
   useEffect(() => {
     (async () => {
-      const [j, d, ls] = await Promise.all([loadJournal(), loadDailyState(), loadLastSession()]);
+      const [j, d, ls, ob] = await Promise.all([loadJournal(), loadDailyState(), loadLastSession(), loadOnboarded()]);
       setJournal(j);
       if (d && d.date === todayKey()) setDailyDone(true);
       if (ls) setLastSession(ls);
+      setOnboarded(ob);
       setLoadingStorage(false);
     })();
     const goOnline = () => setOffline(false);
@@ -95,6 +100,18 @@ export default function App() {
     }
     return () => clearInterval(timerRef.current);
   }, [screen]);
+
+  const handleOnboardingComplete = async () => {
+    setOnboarded(true);
+    await saveOnboarded();
+  };
+
+  const handleShare = async () => {
+    if (sharing || !sessionData?.carry_question) return;
+    setSharing(true);
+    try { await shareCarryQuestion(sessionData.carry_question); } catch {}
+    setSharing(false);
+  };
 
   const handleTypeSelect = (type) => { setPendingType(type); setShowSeedInput(true); };
 
@@ -139,6 +156,17 @@ export default function App() {
     setDailyDone(true);
     setScreen("done");
   };
+
+  // ── Onboarding
+  if (!loadingStorage && !onboarded) return (
+    <>
+      <style>{CSS}</style>
+      <div style={shell}><div style={phone}>
+        <Grain />
+        <Onboarding onComplete={handleOnboardingComplete} />
+      </div></div>
+    </>
+  );
 
   // ── Seed input overlay
   if (showSeedInput) return (
@@ -358,6 +386,9 @@ export default function App() {
             <div style={{ fontSize: 16, fontFamily: "'Cormorant Garamond',serif", fontStyle: "italic", color: "#b0a080", lineHeight: 1.75, marginTop: 10 }}>{sessionData?.carry_question}</div>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 10, width: "100%", marginTop: 32, animation: "fadeUp 0.5s ease 0.44s both" }}>
+            <button className="btn" onClick={handleShare} disabled={sharing} style={{ padding: 13, background: "rgba(200,184,154,0.1)", border: `1px solid rgba(200,184,154,0.25)`, borderRadius: 12, color: COLORS.gold, fontSize: 11, letterSpacing: "0.15em", textTransform: "uppercase", opacity: sharing ? 0.5 : 1 }}>
+              {sharing ? "Creating image…" : "Share this question"}
+            </button>
             <button className="btn" onClick={() => setScreen("journal")} style={{ padding: 13, background: "rgba(200,184,154,0.06)", border: `1px solid ${COLORS.border}`, borderRadius: 12, color: COLORS.textMid, fontSize: 11, letterSpacing: "0.15em", textTransform: "uppercase" }}>
               📖 View question journal
             </button>
