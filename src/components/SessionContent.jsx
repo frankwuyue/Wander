@@ -97,10 +97,86 @@ export function IgnoredSignal({ data }) {
   );
 }
 
+export function DeadGenius({ data }) {
+  return (
+    <div style={{ animation: "fadeUp 0.5s ease forwards" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
+        <div style={{ width: 42, height: 42, borderRadius: "50%", background: "rgba(200,184,154,0.1)", border: `1px solid ${COLORS.border}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>🏛</div>
+        <div>
+          <div style={{ fontSize: 14, color: COLORS.text, fontFamily: "'Cormorant Garamond',serif" }}>{data.genius.name}</div>
+          <Tag>{data.genius.era}</Tag>
+        </div>
+      </div>
+      <div style={{ fontSize: 12, color: COLORS.textDim, lineHeight: 1.7, marginBottom: 18, padding: "10px 14px", background: COLORS.bgCard, borderRadius: 10, animation: "fadeUp 0.5s ease 0.1s both" }}>
+        {data.genius.known_for}
+      </div>
+      <Tag>The modern problem</Tag>
+      <div style={{ fontSize: 14, color: COLORS.textMid, lineHeight: 1.85, margin: "10px 0 20px", animation: "fadeUp 0.5s ease 0.18s both" }}>{data.the_problem}</div>
+      <div style={{ background: "linear-gradient(135deg,rgba(200,184,154,0.07),rgba(200,184,154,0.03))", border: `1px solid rgba(200,184,154,0.18)`, borderRadius: 13, padding: 16, marginBottom: 18, animation: "fadeUp 0.5s ease 0.28s both" }}>
+        <Tag color={COLORS.gold}>Their lens</Tag>
+        <div style={{ fontSize: 14, color: "#d4c4a8", lineHeight: 1.75, marginTop: 8 }}>{data.their_lens}</div>
+      </div>
+      <Tag>The move</Tag>
+      <div style={{ fontSize: 14, color: COLORS.textMid, lineHeight: 1.85, margin: "10px 0 18px", animation: "fadeUp 0.5s ease 0.36s both" }}>{data.the_move}</div>
+      <div style={{ background: COLORS.bgCard, borderRadius: 11, padding: "13px 15px", fontSize: 13, color: COLORS.goldDim, lineHeight: 1.65, marginBottom: 22, animation: "fadeUp 0.5s ease 0.44s both" }}>
+        <span style={{ color: COLORS.gold, fontWeight: 600 }}>The tension: </span>{data.the_tension}
+      </div>
+      <div style={{ borderLeft: `2px solid ${COLORS.gold}`, paddingLeft: 16, animation: "fadeUp 0.5s ease 0.54s both" }}>
+        <Tag>Carry this with you</Tag>
+        <div style={{ fontSize: 15, fontFamily: "'Cormorant Garamond',serif", fontStyle: "italic", color: COLORS.gold, lineHeight: 1.65, marginTop: 8 }}>{data.carry_question}</div>
+      </div>
+    </div>
+  );
+}
+
+export function Detour({ data }) {
+  return (
+    <div style={{ animation: "fadeUp 0.5s ease forwards" }}>
+      {/* Origin */}
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+        <div style={{ width: 28, height: 28, borderRadius: "50%", background: "rgba(200,184,154,0.12)", border: `1px solid ${COLORS.border}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: COLORS.gold }}>1</div>
+        <div>
+          <div style={{ fontSize: 15, fontFamily: "'Cormorant Garamond',serif", color: COLORS.text }}>{data.origin.idea}</div>
+          <Tag>{data.origin.domain}</Tag>
+        </div>
+      </div>
+      <div style={{ fontSize: 13, color: COLORS.textMid, lineHeight: 1.75, marginBottom: 20, paddingLeft: 38 }}>{data.origin.setup}</div>
+
+      {/* Hops */}
+      {data.hops.map((hop, i) => (
+        <div key={i} style={{ animation: `fadeUp 0.5s ease ${0.15 + i * 0.15}s both` }}>
+          <div style={{ height: 24, width: 1, background: `linear-gradient(180deg,${COLORS.border},transparent)`, marginLeft: 14, marginBottom: 8 }} />
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+            <div style={{ width: 28, height: 28, borderRadius: "50%", background: i === 2 ? "rgba(200,184,154,0.18)" : "rgba(200,184,154,0.08)", border: `1px solid ${i === 2 ? "rgba(200,184,154,0.3)" : COLORS.border}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: COLORS.gold }}>{i + 2}</div>
+            <div>
+              <div style={{ fontSize: 15, fontFamily: "'Cormorant Garamond',serif", color: COLORS.text }}>{hop.idea}</div>
+              <Tag>{hop.domain}</Tag>
+            </div>
+          </div>
+          <div style={{ fontSize: 13, color: COLORS.textMid, lineHeight: 1.75, marginBottom: 16, paddingLeft: 38 }}>{hop.connection}</div>
+        </div>
+      ))}
+
+      {/* The View */}
+      <div style={{ background: "linear-gradient(135deg,rgba(200,184,154,0.07),rgba(200,184,154,0.03))", border: `1px solid rgba(200,184,154,0.18)`, borderRadius: 13, padding: 16, marginBottom: 22, marginTop: 8, animation: "fadeUp 0.5s ease 0.6s both" }}>
+        <Tag color={COLORS.gold}>The view from here</Tag>
+        <div style={{ fontSize: 14, color: "#d4c4a8", lineHeight: 1.75, marginTop: 8 }}>{data.the_view_from_here}</div>
+      </div>
+
+      <div style={{ borderLeft: `2px solid ${COLORS.gold}`, paddingLeft: 16, animation: "fadeUp 0.5s ease 0.72s both" }}>
+        <Tag>Carry this with you</Tag>
+        <div style={{ fontSize: 15, fontFamily: "'Cormorant Garamond',serif", fontStyle: "italic", color: COLORS.gold, lineHeight: 1.65, marginTop: 8 }}>{data.carry_question}</div>
+      </div>
+    </div>
+  );
+}
+
 export default function SessionContent({ data, typeId }) {
   if (typeId === "odd_connection") return <OddConnection data={data} />;
   if (typeId === "contrarian") return <Contrarian data={data} />;
   if (typeId === "field_trip") return <FieldTrip data={data} />;
   if (typeId === "ignored_signal") return <IgnoredSignal data={data} />;
+  if (typeId === "dead_genius") return <DeadGenius data={data} />;
+  if (typeId === "detour") return <Detour data={data} />;
   return null;
 }
