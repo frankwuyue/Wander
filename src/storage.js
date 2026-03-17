@@ -62,3 +62,30 @@ export async function saveDailyState(state) {
 export function todayKey() {
   return new Date().toISOString().slice(0, 10);
 }
+
+// ─── Last Session Cache (for offline fallback) ──────────────────────────────
+
+const LAST_SESSION_KEY = "wander-last-session";
+
+export async function saveLastSession(data) {
+  try {
+    if (useLocalStorage()) {
+      localStorage.setItem(LAST_SESSION_KEY, JSON.stringify(data));
+      return;
+    }
+    await window.storage.set(LAST_SESSION_KEY, JSON.stringify(data));
+  } catch {}
+}
+
+export async function loadLastSession() {
+  try {
+    if (useLocalStorage()) {
+      const raw = localStorage.getItem(LAST_SESSION_KEY);
+      return raw ? JSON.parse(raw) : null;
+    }
+    const r = await window.storage.get(LAST_SESSION_KEY);
+    return r ? JSON.parse(r.value) : null;
+  } catch {
+    return null;
+  }
+}
