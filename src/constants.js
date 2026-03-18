@@ -89,16 +89,73 @@ Respond ONLY with a JSON object — no markdown, no backticks, no preamble.
 ];
 
 // ─── Design Tokens ────────────────────────────────────────────────────────────
+export const THEMES = {
+  ember: {
+    name: "Ember",
+    vars: {
+      "--c-bg": "#0f0d0a",
+      "--c-bg-card": "rgba(200,184,154,0.05)",
+      "--c-border": "rgba(200,184,154,0.14)",
+      "--c-border-active": "rgba(200,184,154,0.35)",
+      "--c-gold": "#c8b89a",
+      "--c-gold-dim": "#8a7a65",
+      "--c-gold-faint": "#4a3a28",
+      "--c-text": "#e8dcc8",
+      "--c-text-mid": "#b0a088",
+      "--c-text-dim": "#6a5a44",
+      "--c-text-faint": "#4a3a2e",
+      "--c-card-hover-bg": "rgba(200,184,154,0.08)",
+      "--c-bg-gradient": "linear-gradient(160deg,#141008 0%,#0f0d0a 50%,#0c0b08 100%)",
+    }
+  },
+  slate: {
+    name: "Slate",
+    vars: {
+      "--c-bg": "#08090d",
+      "--c-bg-card": "rgba(140,165,200,0.05)",
+      "--c-border": "rgba(140,165,200,0.14)",
+      "--c-border-active": "rgba(140,165,200,0.35)",
+      "--c-gold": "#8ab0d0",
+      "--c-gold-dim": "#5a7890",
+      "--c-gold-faint": "#1e2d3d",
+      "--c-text": "#c8d8e8",
+      "--c-text-mid": "#7898b0",
+      "--c-text-dim": "#3a5060",
+      "--c-text-faint": "#2a3848",
+      "--c-card-hover-bg": "rgba(140,165,200,0.08)",
+      "--c-bg-gradient": "linear-gradient(160deg,#0c0e14 0%,#08090d 50%,#06080c 100%)",
+    }
+  },
+  forest: {
+    name: "Forest",
+    vars: {
+      "--c-bg": "#070c08",
+      "--c-bg-card": "rgba(140,200,154,0.05)",
+      "--c-border": "rgba(140,200,154,0.14)",
+      "--c-border-active": "rgba(140,200,154,0.35)",
+      "--c-gold": "#88c896",
+      "--c-gold-dim": "#527a5e",
+      "--c-gold-faint": "#182a1e",
+      "--c-text": "#c4e0c8",
+      "--c-text-mid": "#6a9870",
+      "--c-text-dim": "#324838",
+      "--c-text-faint": "#283c2e",
+      "--c-card-hover-bg": "rgba(140,200,154,0.08)",
+      "--c-bg-gradient": "linear-gradient(160deg,#0c1410 0%,#070c08 50%,#050a06 100%)",
+    }
+  },
+};
+
 export const COLORS = {
-  bg: "#0f0d0a",
-  bgCard: "rgba(200,184,154,0.05)",
-  border: "rgba(200,184,154,0.14)",
-  borderActive: "rgba(200,184,154,0.35)",
-  gold: "#c8b89a",
-  goldDim: "#8a7a65",
-  goldFaint: "#4a3a28",
-  text: "#e8dcc8",
-  textMid: "#b0a088",
-  textDim: "#6a5a44",
-  textFaint: "#3a2f22",
+  bg: "var(--c-bg)",
+  bgCard: "var(--c-bg-card)",
+  border: "var(--c-border)",
+  borderActive: "var(--c-border-active)",
+  gold: "var(--c-gold)",
+  goldDim: "var(--c-gold-dim)",
+  goldFaint: "var(--c-gold-faint)",
+  text: "var(--c-text)",
+  textMid: "var(--c-text-mid)",
+  textDim: "var(--c-text-dim)",
+  textFaint: "var(--c-text-faint)",
 };

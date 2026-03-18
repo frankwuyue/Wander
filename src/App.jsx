@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { SESSION_TYPES, COLORS } from "./constants.js";
+import { SESSION_TYPES, COLORS, THEMES } from "./constants.js";
 import { loadJournal, saveJournal, loadDailyState, saveDailyState, todayKey, saveLastSession, loadLastSession, loadOnboarded, saveOnboarded } from "./storage.js";
 import { generateSession, generateAnnualReview } from "./api.js";
 import { shareCarryQuestion } from "./shareImage.js";
@@ -11,7 +11,14 @@ import Onboarding from "./components/Onboarding.jsx";
 const CSS = `
   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Mono:wght@300;400&display=swap');
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body, #root { height: 100%; background: #0f0d0a; }
+  :root {
+    --c-bg: #0f0d0a; --c-bg-card: rgba(200,184,154,0.05); --c-border: rgba(200,184,154,0.14);
+    --c-border-active: rgba(200,184,154,0.35); --c-gold: #c8b89a; --c-gold-dim: #8a7a65;
+    --c-gold-faint: #4a3a28; --c-text: #e8dcc8; --c-text-mid: #b0a088; --c-text-dim: #6a5a44;
+    --c-text-faint: #4a3a2e; --c-card-hover-bg: rgba(200,184,154,0.08);
+    --c-bg-gradient: linear-gradient(160deg,#141008 0%,#0f0d0a 50%,#0c0b08 100%);
+  }
+  html, body, #root { height: 100%; background: var(--c-bg); }
   body { font-family: 'DM Mono', monospace; -webkit-font-smoothing: antialiased; }
   @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes orbPulse { 0%,100% { opacity:.2; transform:scale(.8); } 50% { opacity:1; transform:scale(1.2); } }
@@ -20,7 +27,7 @@ const CSS = `
   .btn { cursor: pointer; transition: all .2s ease; border: none; outline: none; background: none; }
   .btn:active { transform: scale(.97); }
   .card-hover { transition: all .2s ease; cursor: pointer; }
-  .card-hover:hover { border-color: rgba(200,184,154,.35) !important; background: rgba(200,184,154,.08) !important; transform: translateY(-1px); }
+  .card-hover:hover { border-color: var(--c-border-active) !important; background: var(--c-card-hover-bg) !important; transform: translateY(-1px); }
   ::-webkit-scrollbar { width: 0; }
 `;
 
@@ -53,8 +60,8 @@ const fmt = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 const fmtDuration = (s) => s < 60 ? `${s}s` : `${Math.floor(s / 60)}m ${s % 60}s`;
 
 // ─── App shell ────────────────────────────────────────────────────────────────
-const shell = { minHeight: "100vh", background: COLORS.bg, display: "flex", justifyContent: "center", fontFamily: "'DM Mono',monospace" };
-const phone = { width: "100%", maxWidth: 420, minHeight: "100vh", background: "linear-gradient(160deg,#141008 0%,#0f0d0a 50%,#0c0b08 100%)", position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", paddingTop: "env(safe-area-inset-top)", paddingBottom: "env(safe-area-inset-bottom)" };
+const shell = { height: "100dvh", background: COLORS.bg, display: "flex", justifyContent: "center", fontFamily: "'DM Mono',monospace", overflow: "hidden" };
+const phone = { width: "100%", maxWidth: 420, height: "100%", background: "var(--c-bg-gradient)", position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", paddingTop: "env(safe-area-inset-top)", paddingBottom: "env(safe-area-inset-bottom)" };
 
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function App() {
@@ -77,6 +84,19 @@ export default function App() {
   const [annualReview, setAnnualReview] = useState(null);
   const [loadingReview, setLoadingReview] = useState(false);
   const timerRef = useRef(null);
+
+  const [theme, setTheme] = useState(() => localStorage.getItem("wander-theme") || "ember");
+
+  useEffect(() => {
+    const t = THEMES[theme] || THEMES.ember;
+    Object.entries(t.vars).forEach(([k, v]) => document.documentElement.style.setProperty(k, v));
+    localStorage.setItem("wander-theme", theme);
+  }, [theme]);
+
+  const cycleTheme = () => {
+    const keys = Object.keys(THEMES);
+    setTheme(keys[(keys.indexOf(theme) + 1) % keys.length]);
+  };
 
   useEffect(() => {
     (async () => {
@@ -292,16 +312,22 @@ export default function App() {
       <style>{CSS}</style>
       <div style={shell}><div style={phone}>
         <Grain />
-        <div style={{ position: "relative", zIndex: 1, flex: 1, display: "flex", flexDirection: "column", padding: "52px 26px 36px" }}>
-          <div style={{ marginBottom: 32, animation: "fadeUp 0.6s ease forwards" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
-              <div style={{ width: 30, height: 30, borderRadius: "50%", background: "radial-gradient(circle,rgba(200,184,154,.3),transparent)", border: `1px solid rgba(200,184,154,.25)`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, position: "relative" }}>
-                🌀
-                <div style={{ position: "absolute", inset: -5, borderRadius: "50%", border: "1px solid rgba(200,184,154,.1)", animation: "rippleOut 2.5s ease-out infinite" }} />
+        <div style={{ position: "relative", zIndex: 1, flex: 1, display: "flex", flexDirection: "column", padding: "52px 26px 32px", overflowY: "auto" }}>
+          <div style={{ marginBottom: 28, animation: "fadeUp 0.6s ease forwards" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <div style={{ width: 30, height: 30, borderRadius: "50%", background: "radial-gradient(circle,rgba(200,184,154,.3),transparent)", border: `1px solid rgba(200,184,154,.25)`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, position: "relative" }}>
+                  🌀
+                  <div style={{ position: "absolute", inset: -5, borderRadius: "50%", border: "1px solid rgba(200,184,154,.1)", animation: "rippleOut 2.5s ease-out infinite" }} />
+                </div>
+                <span style={{ fontSize: 19, letterSpacing: "0.28em", color: COLORS.gold }}>WANDER</span>
               </div>
-              <span style={{ fontSize: 19, letterSpacing: "0.28em", color: COLORS.gold }}>WANDER</span>
+              <button className="btn" onClick={cycleTheme} title={`Theme: ${THEMES[theme]?.name}`}
+                style={{ fontSize: 16, color: COLORS.goldDim, padding: "4px 8px", border: `1px solid ${COLORS.border}`, borderRadius: 8, letterSpacing: "0.1em", fontSize: 10, color: COLORS.textDim }}>
+                {THEMES[theme]?.name}
+              </button>
             </div>
-            <Tag color={COLORS.textFaint}>A sanctuary for the wandering mind</Tag>
+            <Tag color={COLORS.textMid}>A sanctuary for the wandering mind</Tag>
           </div>
 
           {!loadingStorage && (
@@ -328,7 +354,7 @@ export default function App() {
           {!dailyDone && (
             <>
               <div style={{ fontSize: 9, letterSpacing: "0.2em", color: COLORS.textFaint, textTransform: "uppercase", marginBottom: 10, animation: "fadeUp 0.6s ease 0.2s both" }}>Choose your session</div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 9, animation: "fadeUp 0.6s ease 0.25s both" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8, animation: "fadeUp 0.6s ease 0.25s both" }}>
                 {SESSION_TYPES.map((type) => (
                   <div key={type.id} className="card-hover" onClick={() => handleTypeSelect(type)}
                     style={{ border: `1px solid ${COLORS.border}`, borderRadius: 13, padding: "14px 16px", display: "flex", alignItems: "center", gap: 13, background: COLORS.bgCard }}>
