@@ -19,7 +19,7 @@ const CSS = `
     --c-bg-gradient: linear-gradient(160deg,#141008 0%,#0f0d0a 50%,#0c0b08 100%);
   }
   html, body, #root { height: 100%; background: var(--c-bg); }
-  body { font-family: 'DM Mono', monospace; -webkit-font-smoothing: antialiased; }
+  body { font-family: system-ui, -apple-system, sans-serif; -webkit-font-smoothing: antialiased; }
   @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes orbPulse { 0%,100% { opacity:.2; transform:scale(.8); } 50% { opacity:1; transform:scale(1.2); } }
   @keyframes slowSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
@@ -60,7 +60,7 @@ const fmt = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 const fmtDuration = (s) => s < 60 ? `${s}s` : `${Math.floor(s / 60)}m ${s % 60}s`;
 
 // ─── App shell ────────────────────────────────────────────────────────────────
-const shell = { height: "100dvh", background: COLORS.bg, display: "flex", justifyContent: "center", fontFamily: "'DM Mono',monospace", overflow: "hidden" };
+const shell = { height: "100dvh", background: COLORS.bg, display: "flex", justifyContent: "center", fontFamily: "system-ui, -apple-system, sans-serif", overflow: "hidden" };
 const phone = { width: "100%", maxWidth: 420, height: "100%", background: "var(--c-bg-gradient)", position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", paddingTop: "env(safe-area-inset-top)", paddingBottom: "env(safe-area-inset-bottom)" };
 
 // ─── Main component ───────────────────────────────────────────────────────────
@@ -358,7 +358,7 @@ export default function App() {
                 {SESSION_TYPES.map((type) => (
                   <div key={type.id} className="card-hover" onClick={() => handleTypeSelect(type)}
                     style={{ border: `1px solid ${COLORS.border}`, borderRadius: 13, padding: "14px 16px", display: "flex", alignItems: "center", gap: 13, background: COLORS.bgCard }}>
-                    <span style={{ fontSize: 20 }}>{type.icon}</span>
+                    <span style={{ fontSize: 24 }}>{type.icon}</span>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontSize: 14, color: COLORS.text, marginBottom: 3 }}>{type.label}</div>
                       <div style={{ fontSize: 11, color: COLORS.textMid }}>{type.tagline}</div>
