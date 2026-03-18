@@ -6,6 +6,7 @@ import { shareCarryQuestion } from "./shareImage.js";
 import SessionContent from "./components/SessionContent.jsx";
 import Journal from "./components/Journal.jsx";
 import Onboarding from "./components/Onboarding.jsx";
+import { LANG_STRINGS, CHINESE_PROMPT_SUFFIX } from "./i18n.js";
 
 // ─── Global CSS ───────────────────────────────────────────────────────────────
 const CSS = `
@@ -86,6 +87,13 @@ export default function App() {
   const timerRef = useRef(null);
 
   const [theme, setTheme] = useState(() => localStorage.getItem("wander-theme") || "ember");
+  const [lang, setLang] = useState(() => localStorage.getItem("wander-lang") || "en");
+  const t = LANG_STRINGS[lang];
+  const toggleLang = () => {
+    const next = lang === "en" ? "zh" : "en";
+    setLang(next);
+    localStorage.setItem("wander-lang", next);
+  };
 
   useEffect(() => {
     const t = THEMES[theme] || THEMES.ember;
@@ -157,7 +165,8 @@ export default function App() {
     setScreen("loading");
     setError(null);
     try {
-      const data = await generateSession(type.buildPrompt(seedText?.trim() || null));
+      const prompt = type.buildPrompt(seedText?.trim() || null) + (lang === "zh" ? CHINESE_PROMPT_SUFFIX : "");
+      const data = await generateSession(prompt);
       setSessionData(data);
       setScreen("session");
       saveLastSession({ data, typeId: type.id });
@@ -219,22 +228,22 @@ export default function App() {
         <Grain />
         <div style={{ position: "relative", zIndex: 1, flex: 1, display: "flex", flexDirection: "column", padding: "56px 28px 40px" }}>
           <div style={{ fontSize: 22, fontFamily: "'Cormorant Garamond',serif", color: COLORS.text, lineHeight: 1.4, marginBottom: 12, animation: "fadeUp 0.5s ease forwards" }}>
-            What's on your mind<br /><span style={{ color: COLORS.gold }}>right now?</span>
+            {t.whatsOnMind}<br /><span style={{ color: COLORS.gold }}>{t.rightNow}</span>
           </div>
           <div style={{ fontSize: 13, color: COLORS.textDim, lineHeight: 1.8, marginBottom: 28, animation: "fadeUp 0.5s ease 0.1s both" }}>
-            Optional. A word, a problem, a mood. Wander will weave your session around it — or surprise you if you leave it blank.
+            {t.seedHint}
           </div>
-          <textarea autoFocus placeholder="e.g. my career feels stuck… or leave blank" value={seed} onChange={e => setSeed(e.target.value)} maxLength={120}
+          <textarea autoFocus placeholder={t.seedPlaceholder} value={seed} onChange={e => setSeed(e.target.value)} maxLength={120}
             style={{ background: "rgba(200,184,154,0.05)", border: `1px solid ${COLORS.border}`, borderRadius: 14, padding: 16, color: COLORS.textMid, fontSize: 14, fontFamily: "'DM Mono',monospace", resize: "none", height: 100, outline: "none", lineHeight: 1.7, marginBottom: 8, animation: "fadeUp 0.5s ease 0.2s both" }} />
           <div style={{ fontSize: 10, color: COLORS.textFaint, textAlign: "right", marginBottom: 28 }}>{seed.length}/120</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             <button className="btn" onClick={() => { setShowSeedInput(false); startSession(pendingType, seed); }}
               style={{ padding: 16, background: "rgba(200,184,154,0.1)", border: `1px solid rgba(200,184,154,0.3)`, borderRadius: 14, color: COLORS.gold, fontSize: 13, letterSpacing: "0.15em", textTransform: "uppercase" }}>
-              {seed.trim() ? "Begin with this seed" : "Surprise me"}
+              {seed.trim() ? t.beginSeed : t.surpriseMe}
             </button>
             <button className="btn" onClick={() => { setShowSeedInput(false); setSeed(""); setPendingType(null); }}
               style={{ padding: 13, border: `1px solid ${COLORS.border}`, borderRadius: 14, color: COLORS.textDim, fontSize: 11, letterSpacing: "0.15em", textTransform: "uppercase" }}>
-              Go back
+              {t.goBack}
             </button>
           </div>
           <div style={{ marginTop: "auto", paddingTop: 28, display: "flex", alignItems: "center", gap: 10 }}>
@@ -272,16 +281,16 @@ export default function App() {
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 32 }}>
             <button onClick={() => setScreen("journal")} style={{ background: "none", border: "none", color: COLORS.goldDim, fontSize: 20, cursor: "pointer", padding: 0, lineHeight: 1 }}>←</button>
             <div>
-              <div style={{ fontSize: 18, fontFamily: "'Cormorant Garamond',serif", color: COLORS.text }}>Year in Questions</div>
-              <Tag color={COLORS.textFaint}>{journal.length} sessions reflected</Tag>
+              <div style={{ fontSize: 18, fontFamily: "'Cormorant Garamond',serif", color: COLORS.text }}>{t.yearInQ}</div>
+              <Tag color={COLORS.textFaint}>{t.sessionsReflected(journal.length)}</Tag>
             </div>
           </div>
 
           {loadingReview ? (
             <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
               <div style={{ fontSize: 30, marginBottom: 20 }}>✦</div>
-              <div style={{ fontSize: 12, color: COLORS.textDim, letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 8 }}>Reading your questions</div>
-              <div style={{ fontSize: 11, color: COLORS.textFaint }}>Finding the threads…</div>
+              <div style={{ fontSize: 12, color: COLORS.textDim, letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 8 }}>{t.readingQ}</div>
+              <div style={{ fontSize: 11, color: COLORS.textFaint }}>{t.findingThreads}</div>
               <Orbs />
             </div>
           ) : annualReview ? (
@@ -289,14 +298,14 @@ export default function App() {
               <div style={{ fontSize: 24, fontFamily: "'Cormorant Garamond',serif", color: COLORS.text, lineHeight: 1.35, marginBottom: 24 }}>{annualReview.title}</div>
               <div style={{ fontSize: 14, color: COLORS.textMid, lineHeight: 2, marginBottom: 28, whiteSpace: "pre-line" }}>{annualReview.reflection}</div>
               <Divider margin="0 0 20px" />
-              <Tag>Themes</Tag>
+              <Tag>{t.themes}</Tag>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 8, margin: "12px 0 28px" }}>
                 {annualReview.themes?.map((theme, i) => (
                   <span key={i} style={{ padding: "6px 14px", background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 20, fontSize: 12, color: COLORS.goldDim }}>{theme}</span>
                 ))}
               </div>
               <div style={{ borderLeft: `2px solid ${COLORS.gold}`, paddingLeft: 16, marginBottom: 32 }}>
-                <Tag>A question for the road</Tag>
+                <Tag>{t.roadQ}</Tag>
                 <div style={{ fontSize: 16, fontFamily: "'Cormorant Garamond',serif", fontStyle: "italic", color: COLORS.gold, lineHeight: 1.65, marginTop: 8 }}>{annualReview.closing_question}</div>
               </div>
             </div>
@@ -322,12 +331,18 @@ export default function App() {
                 </div>
                 <span style={{ fontSize: 19, letterSpacing: "0.28em", color: COLORS.gold }}>WANDER</span>
               </div>
-              <button className="btn" onClick={cycleTheme} title={`Theme: ${THEMES[theme]?.name}`}
-                style={{ fontSize: 16, color: COLORS.goldDim, padding: "4px 8px", border: `1px solid ${COLORS.border}`, borderRadius: 8, letterSpacing: "0.1em", fontSize: 10, color: COLORS.textDim }}>
-                {THEMES[theme]?.name}
-              </button>
+              <div style={{ display: "flex", gap: 6 }}>
+                <button className="btn" onClick={toggleLang}
+                  style={{ padding: "4px 10px", border: `1px solid ${COLORS.border}`, borderRadius: 8, fontSize: 11, color: COLORS.textMid, letterSpacing: "0.05em" }}>
+                  {lang === "en" ? "中" : "EN"}
+                </button>
+                <button className="btn" onClick={cycleTheme}
+                  style={{ padding: "4px 8px", border: `1px solid ${COLORS.border}`, borderRadius: 8, fontSize: 11, color: COLORS.textDim }}>
+                  {THEMES[theme]?.name}
+                </button>
+              </div>
             </div>
-            <Tag color={COLORS.textMid}>A sanctuary for the wandering mind</Tag>
+            <Tag color={COLORS.textMid}>{t.tagline}</Tag>
           </div>
 
           {!loadingStorage && (
@@ -336,16 +351,16 @@ export default function App() {
                 <div style={{ background: "rgba(200,184,154,0.06)", border: `1px solid rgba(200,184,154,0.15)`, borderRadius: 14, padding: "16px 18px", display: "flex", alignItems: "center", gap: 14 }}>
                   <div style={{ fontSize: 22 }}>✦</div>
                   <div>
-                    <div style={{ fontSize: 14, color: COLORS.textMid, marginBottom: 2 }}>Today's session complete.</div>
-                    <div style={{ fontSize: 12, color: COLORS.textDim }}>Come back tomorrow. Let the question breathe.</div>
+                    <div style={{ fontSize: 14, color: COLORS.textMid, marginBottom: 2 }}>{t.sessionDone}</div>
+                    <div style={{ fontSize: 12, color: COLORS.textDim }}>{t.sessionDoneSub}</div>
                   </div>
                 </div>
               ) : (
                 <div>
                   <div style={{ fontSize: 24, fontFamily: "'Cormorant Garamond',serif", color: COLORS.text, lineHeight: 1.4, marginBottom: 8 }}>
-                    You have<br /><span style={{ color: COLORS.gold }}>10 minutes.</span>
+                    {t.youHave}<br /><span style={{ color: COLORS.gold }}>{t.tenMinutes}</span>
                   </div>
-                  <div style={{ fontSize: 13, color: COLORS.textDim, lineHeight: 1.8 }}>No feed. No algorithm.<br />One idea, chosen to shift how you see today.</div>
+                  <div style={{ fontSize: 13, color: COLORS.textDim, lineHeight: 1.8 }}>{t.noFeed}<br />{t.oneIdea}</div>
                 </div>
               )}
             </div>
@@ -353,15 +368,15 @@ export default function App() {
 
           {!dailyDone && (
             <>
-              <div style={{ fontSize: 10, letterSpacing: "0.15em", color: COLORS.textDim, textTransform: "uppercase", marginBottom: 10, animation: "fadeUp 0.6s ease 0.2s both" }}>Choose your session</div>
+              <div style={{ fontSize: 10, letterSpacing: "0.1em", color: COLORS.textDim, textTransform: "uppercase", marginBottom: 10, animation: "fadeUp 0.6s ease 0.2s both" }}>{t.chooseSession}</div>
               <div style={{ display: "flex", flexDirection: "column", gap: 8, animation: "fadeUp 0.6s ease 0.25s both" }}>
                 {SESSION_TYPES.map((type) => (
                   <div key={type.id} className="card-hover" onClick={() => handleTypeSelect(type)}
                     style={{ border: `1px solid ${COLORS.border}`, borderRadius: 13, padding: "14px 16px", display: "flex", alignItems: "center", gap: 13, background: COLORS.bgCard }}>
                     <span style={{ fontSize: 24 }}>{type.icon}</span>
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 14, color: COLORS.text, marginBottom: 3 }}>{type.label}</div>
-                      <div style={{ fontSize: 11, color: COLORS.textMid }}>{type.tagline}</div>
+                      <div style={{ fontSize: 14, color: COLORS.text, marginBottom: 3 }}>{t.sessionTypes[type.id]?.label || type.label}</div>
+                      <div style={{ fontSize: 11, color: COLORS.textMid }}>{t.sessionTypes[type.id]?.tagline || type.tagline}</div>
                     </div>
                     <div style={{ color: COLORS.goldDim, fontSize: 16 }}>›</div>
                   </div>
@@ -375,8 +390,8 @@ export default function App() {
               style={{ width: "100%", padding: "14px 16px", border: `1px solid ${COLORS.border}`, borderRadius: 13, display: "flex", alignItems: "center", gap: 13 }}>
               <span style={{ fontSize: 18 }}>📖</span>
               <div style={{ flex: 1, textAlign: "left" }}>
-                <div style={{ fontSize: 14, color: COLORS.textMid }}>Question Journal</div>
-                <div style={{ fontSize: 11, color: COLORS.textDim }}>{journal.length === 0 ? "Your questions accumulate here" : `${journal.length} question${journal.length === 1 ? "" : "s"} collected`}</div>
+                <div style={{ fontSize: 14, color: COLORS.textMid }}>{t.journal}</div>
+                <div style={{ fontSize: 11, color: COLORS.textDim }}>{journal.length === 0 ? t.journalEmpty : t.journalCount(journal.length)}</div>
               </div>
               <div style={{ color: COLORS.goldDim, fontSize: 16 }}>›</div>
             </button>
@@ -387,7 +402,7 @@ export default function App() {
           {offline && (
             <div style={{ marginTop: 14, padding: "12px 14px", background: "rgba(200,184,154,0.06)", borderRadius: 10, fontSize: 11, color: COLORS.textDim, border: `1px solid ${COLORS.border}`, display: "flex", alignItems: "center", gap: 10 }}>
               <span style={{ fontSize: 14 }}>◌</span>
-              <span>You're offline.{lastSession ? " You can re-read your last session." : ""}</span>
+              <span>{t.offline}{lastSession ? ` ${t.offlineLast}` : ""}</span>
             </div>
           )}
 
@@ -396,14 +411,14 @@ export default function App() {
               style={{ marginTop: 10, width: "100%", padding: "14px 16px", border: `1px solid ${COLORS.border}`, borderRadius: 13, display: "flex", alignItems: "center", gap: 13 }}>
               <span style={{ fontSize: 18 }}>↩</span>
               <div style={{ flex: 1, textAlign: "left" }}>
-                <div style={{ fontSize: 13, color: COLORS.textDim }}>Re-read last session</div>
-                <div style={{ fontSize: 10, color: COLORS.textFaint }}>{lastSession.data?.session_title || "Your previous session"}</div>
+                <div style={{ fontSize: 13, color: COLORS.textDim }}>{t.rereadLast}</div>
+                <div style={{ fontSize: 10, color: COLORS.textFaint }}>{lastSession.data?.session_title || t.yourPrevSession}</div>
               </div>
               <div style={{ color: COLORS.goldFaint, fontSize: 15 }}>›</div>
             </button>
           )}
 
-          <div style={{ marginTop: "auto", paddingTop: 24, fontSize: 9, color: COLORS.textFaint, letterSpacing: "0.12em", textAlign: "center" }}>No streaks · No scores · Just thinking</div>
+          <div style={{ marginTop: "auto", paddingTop: 24, fontSize: 9, color: COLORS.textFaint, letterSpacing: "0.08em", textAlign: "center" }}>{t.footer}</div>
         </div>
       </div></div>
     </>
@@ -420,9 +435,9 @@ export default function App() {
             {selectedType?.icon}
             <div style={{ position: "absolute", inset: -7, borderRadius: "50%", border: `1px solid rgba(200,184,154,.08)`, animation: "slowSpin 4s linear infinite" }} />
           </div>
-          <div style={{ fontSize: 11, color: COLORS.textDim, letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 6 }}>Preparing your session</div>
+          <div style={{ fontSize: 11, color: COLORS.textDim, letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 6 }}>{t.preparing}</div>
           <div style={{ fontSize: 10, color: COLORS.textFaint, marginBottom: 24 }}>{selectedType?.label}</div>
-          {seed?.trim() && <div style={{ fontSize: 11, color: COLORS.goldDim, padding: "6px 14px", background: "rgba(200,184,154,0.06)", borderRadius: 20, border: `1px solid ${COLORS.border}`, marginBottom: 8 }}>Seeded: {seed.trim()}</div>}
+          {seed?.trim() && <div style={{ fontSize: 11, color: COLORS.goldDim, padding: "6px 14px", background: "rgba(200,184,154,0.06)", borderRadius: 20, border: `1px solid ${COLORS.border}`, marginBottom: 8 }}>{t.seededWith} {seed.trim()}</div>}
           <Orbs />
         </div>
       </div></div>
@@ -446,12 +461,12 @@ export default function App() {
           </div>
           <Divider margin="0 22px 20px" />
           <div style={{ padding: "0 22px", flex: 1, overflowY: "auto" }}>
-            <SessionContent data={sessionData} typeId={selectedType?.id} />
+            <SessionContent data={sessionData} typeId={selectedType?.id} labels={t.sessionLabels[selectedType?.id]} />
             <div style={{ height: 24 }} />
           </div>
           <div style={{ padding: "16px 22px 40px" }}>
             <button className="btn" onClick={handleFlush} style={{ width: "100%", padding: 15, background: "rgba(200,184,154,0.08)", border: `1px solid rgba(200,184,154,0.25)`, borderRadius: 14, color: COLORS.gold, fontSize: 12, letterSpacing: "0.16em", textTransform: "uppercase", display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
-              <span>🚿</span> Flush & carry the question
+              {t.flushBtn}
             </button>
           </div>
         </div>
@@ -467,9 +482,9 @@ export default function App() {
         <Grain />
         <div style={{ position: "relative", zIndex: 1, flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 32px", textAlign: "center" }}>
           <div style={{ fontSize: 22, fontFamily: "'Cormorant Garamond',serif", color: COLORS.text, lineHeight: 1.4, marginBottom: 10, animation: "fadeUp 0.5s ease forwards" }}>
-            How did that<br /><span style={{ color: COLORS.gold }}>feel?</span>
+            {t.howDidItFeel}<br /><span style={{ color: COLORS.gold }}>{t.feel}</span>
           </div>
-          <div style={{ fontSize: 12, color: COLORS.textDim, marginBottom: 36, animation: "fadeUp 0.5s ease 0.1s both" }}>One tap. No scores.</div>
+          <div style={{ fontSize: 12, color: COLORS.textDim, marginBottom: 36, animation: "fadeUp 0.5s ease 0.1s both" }}>{t.oneTap}</div>
           <div style={{ display: "flex", gap: 16, flexWrap: "wrap", justifyContent: "center", marginBottom: 36, animation: "fadeUp 0.5s ease 0.2s both" }}>
             {["🌊", "⚡", "🌿", "🔥", "🌙", "✨"].map(emoji => (
               <button key={emoji} className="btn" onClick={() => { setPendingMood(emoji); handleMoodSelect(emoji); }}
