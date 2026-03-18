@@ -19,7 +19,7 @@ const CSS = `
     --c-bg-gradient: linear-gradient(160deg,#141008 0%,#0f0d0a 50%,#0c0b08 100%);
   }
   html, body, #root { height: 100%; background: var(--c-bg); }
-  body { font-family: 'DM Mono', monospace; -webkit-font-smoothing: antialiased; }
+  body { font-family: system-ui, -apple-system, sans-serif; -webkit-font-smoothing: antialiased; }
   @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes orbPulse { 0%,100% { opacity:.2; transform:scale(.8); } 50% { opacity:1; transform:scale(1.2); } }
   @keyframes slowSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
@@ -60,7 +60,7 @@ const fmt = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 const fmtDuration = (s) => s < 60 ? `${s}s` : `${Math.floor(s / 60)}m ${s % 60}s`;
 
 // ─── App shell ────────────────────────────────────────────────────────────────
-const shell = { height: "100dvh", background: COLORS.bg, display: "flex", justifyContent: "center", fontFamily: "'DM Mono',monospace", overflow: "hidden" };
+const shell = { height: "100dvh", background: COLORS.bg, display: "flex", justifyContent: "center", fontFamily: "system-ui, -apple-system, sans-serif", overflow: "hidden" };
 const phone = { width: "100%", maxWidth: 420, height: "100%", background: "var(--c-bg-gradient)", position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", paddingTop: "env(safe-area-inset-top)", paddingBottom: "env(safe-area-inset-bottom)" };
 
 // ─── Main component ───────────────────────────────────────────────────────────
@@ -336,8 +336,8 @@ export default function App() {
                 <div style={{ background: "rgba(200,184,154,0.06)", border: `1px solid rgba(200,184,154,0.15)`, borderRadius: 14, padding: "16px 18px", display: "flex", alignItems: "center", gap: 14 }}>
                   <div style={{ fontSize: 22 }}>✦</div>
                   <div>
-                    <div style={{ fontSize: 13, color: COLORS.textMid, marginBottom: 2 }}>Today's session complete.</div>
-                    <div style={{ fontSize: 11, color: COLORS.textFaint }}>Come back tomorrow. Let the question breathe.</div>
+                    <div style={{ fontSize: 14, color: COLORS.textMid, marginBottom: 2 }}>Today's session complete.</div>
+                    <div style={{ fontSize: 12, color: COLORS.textDim }}>Come back tomorrow. Let the question breathe.</div>
                   </div>
                 </div>
               ) : (
@@ -353,17 +353,17 @@ export default function App() {
 
           {!dailyDone && (
             <>
-              <div style={{ fontSize: 9, letterSpacing: "0.2em", color: COLORS.textFaint, textTransform: "uppercase", marginBottom: 10, animation: "fadeUp 0.6s ease 0.2s both" }}>Choose your session</div>
+              <div style={{ fontSize: 10, letterSpacing: "0.15em", color: COLORS.textDim, textTransform: "uppercase", marginBottom: 10, animation: "fadeUp 0.6s ease 0.2s both" }}>Choose your session</div>
               <div style={{ display: "flex", flexDirection: "column", gap: 8, animation: "fadeUp 0.6s ease 0.25s both" }}>
                 {SESSION_TYPES.map((type) => (
                   <div key={type.id} className="card-hover" onClick={() => handleTypeSelect(type)}
                     style={{ border: `1px solid ${COLORS.border}`, borderRadius: 13, padding: "14px 16px", display: "flex", alignItems: "center", gap: 13, background: COLORS.bgCard }}>
-                    <span style={{ fontSize: 20 }}>{type.icon}</span>
+                    <span style={{ fontSize: 24 }}>{type.icon}</span>
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 13, color: "#d4c4a8", marginBottom: 2 }}>{type.label}</div>
-                      <div style={{ fontSize: 10, color: COLORS.textFaint }}>{type.tagline}</div>
+                      <div style={{ fontSize: 14, color: COLORS.text, marginBottom: 3 }}>{type.label}</div>
+                      <div style={{ fontSize: 11, color: COLORS.textMid }}>{type.tagline}</div>
                     </div>
-                    <div style={{ color: COLORS.goldFaint, fontSize: 15 }}>›</div>
+                    <div style={{ color: COLORS.goldDim, fontSize: 16 }}>›</div>
                   </div>
                 ))}
               </div>
@@ -375,10 +375,10 @@ export default function App() {
               style={{ width: "100%", padding: "14px 16px", border: `1px solid ${COLORS.border}`, borderRadius: 13, display: "flex", alignItems: "center", gap: 13 }}>
               <span style={{ fontSize: 18 }}>📖</span>
               <div style={{ flex: 1, textAlign: "left" }}>
-                <div style={{ fontSize: 13, color: COLORS.textDim }}>Question Journal</div>
-                <div style={{ fontSize: 10, color: COLORS.textFaint }}>{journal.length === 0 ? "Your questions accumulate here" : `${journal.length} question${journal.length === 1 ? "" : "s"} collected`}</div>
+                <div style={{ fontSize: 14, color: COLORS.textMid }}>Question Journal</div>
+                <div style={{ fontSize: 11, color: COLORS.textDim }}>{journal.length === 0 ? "Your questions accumulate here" : `${journal.length} question${journal.length === 1 ? "" : "s"} collected`}</div>
               </div>
-              <div style={{ color: COLORS.goldFaint, fontSize: 15 }}>›</div>
+              <div style={{ color: COLORS.goldDim, fontSize: 16 }}>›</div>
             </button>
           </div>
 
