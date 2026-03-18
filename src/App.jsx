@@ -361,7 +361,7 @@ export default function App() {
                     <span style={{ fontSize: 20 }}>{type.icon}</span>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontSize: 13, color: "#d4c4a8", marginBottom: 2 }}>{type.label}</div>
-                      <div style={{ fontSize: 10, color: COLORS.textFaint }}>{type.tagline}</div>
+                      <div style={{ fontSize: 10, color: COLORS.textDim }}>{type.tagline}</div>
                     </div>
                     <div style={{ color: COLORS.goldFaint, fontSize: 15 }}>›</div>
                   </div>
