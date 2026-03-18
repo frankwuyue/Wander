@@ -336,8 +336,8 @@ export default function App() {
                 <div style={{ background: "rgba(200,184,154,0.06)", border: `1px solid rgba(200,184,154,0.15)`, borderRadius: 14, padding: "16px 18px", display: "flex", alignItems: "center", gap: 14 }}>
                   <div style={{ fontSize: 22 }}>✦</div>
                   <div>
-                    <div style={{ fontSize: 13, color: COLORS.textMid, marginBottom: 2 }}>Today's session complete.</div>
-                    <div style={{ fontSize: 11, color: COLORS.textFaint }}>Come back tomorrow. Let the question breathe.</div>
+                    <div style={{ fontSize: 14, color: COLORS.textMid, marginBottom: 2 }}>Today's session complete.</div>
+                    <div style={{ fontSize: 12, color: COLORS.textDim }}>Come back tomorrow. Let the question breathe.</div>
                   </div>
                 </div>
               ) : (
@@ -353,17 +353,17 @@ export default function App() {
 
           {!dailyDone && (
             <>
-              <div style={{ fontSize: 9, letterSpacing: "0.2em", color: COLORS.textFaint, textTransform: "uppercase", marginBottom: 10, animation: "fadeUp 0.6s ease 0.2s both" }}>Choose your session</div>
+              <div style={{ fontSize: 10, letterSpacing: "0.15em", color: COLORS.textDim, textTransform: "uppercase", marginBottom: 10, animation: "fadeUp 0.6s ease 0.2s both" }}>Choose your session</div>
               <div style={{ display: "flex", flexDirection: "column", gap: 8, animation: "fadeUp 0.6s ease 0.25s both" }}>
                 {SESSION_TYPES.map((type) => (
                   <div key={type.id} className="card-hover" onClick={() => handleTypeSelect(type)}
                     style={{ border: `1px solid ${COLORS.border}`, borderRadius: 13, padding: "14px 16px", display: "flex", alignItems: "center", gap: 13, background: COLORS.bgCard }}>
                     <span style={{ fontSize: 20 }}>{type.icon}</span>
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 13, color: "#d4c4a8", marginBottom: 2 }}>{type.label}</div>
-                      <div style={{ fontSize: 10, color: COLORS.textDim }}>{type.tagline}</div>
+                      <div style={{ fontSize: 14, color: COLORS.text, marginBottom: 3 }}>{type.label}</div>
+                      <div style={{ fontSize: 11, color: COLORS.textMid }}>{type.tagline}</div>
                     </div>
-                    <div style={{ color: COLORS.goldFaint, fontSize: 15 }}>›</div>
+                    <div style={{ color: COLORS.goldDim, fontSize: 16 }}>›</div>
                   </div>
                 ))}
               </div>
@@ -375,10 +375,10 @@ export default function App() {
               style={{ width: "100%", padding: "14px 16px", border: `1px solid ${COLORS.border}`, borderRadius: 13, display: "flex", alignItems: "center", gap: 13 }}>
               <span style={{ fontSize: 18 }}>📖</span>
               <div style={{ flex: 1, textAlign: "left" }}>
-                <div style={{ fontSize: 13, color: COLORS.textDim }}>Question Journal</div>
-                <div style={{ fontSize: 10, color: COLORS.textFaint }}>{journal.length === 0 ? "Your questions accumulate here" : `${journal.length} question${journal.length === 1 ? "" : "s"} collected`}</div>
+                <div style={{ fontSize: 14, color: COLORS.textMid }}>Question Journal</div>
+                <div style={{ fontSize: 11, color: COLORS.textDim }}>{journal.length === 0 ? "Your questions accumulate here" : `${journal.length} question${journal.length === 1 ? "" : "s"} collected`}</div>
               </div>
-              <div style={{ color: COLORS.goldFaint, fontSize: 15 }}>›</div>
+              <div style={{ color: COLORS.goldDim, fontSize: 16 }}>›</div>
             </button>
           </div>
 
